@@ -1,25 +1,55 @@
 
 %default total 
 
+church : Type
+church = (a : _) -> (a -> a) -> (a -> a)
 
-one : {A : Type} -> (A -> A) -> A -> A
-one f x = f x
+one : Main.church 
+one t f x = f x
 
-zero : {A : Type} -> (A -> A) -> A -> A
-zero f x = x
-
-
-toChurch : {A : Type} -> Nat -> (A -> A) -> A -> A
-toChurch Z f x = x
-toChurch (S n) f x = f (toChurch n f x)
+zero : Main.church
+zero t f x = x
 
 
-addOne : ({B : Type} -> (B -> B) -> B -> B) -> ({A : Type} -> (A -> A) -> A -> A)
-addOne a f x = a f (f x)
-
-add : ({A : Type} -> (A -> A) -> A -> A) -> ({B : Type} -> (B -> B) -> B -> B) -> ({C : Type} -> (C -> C) -> C -> C)
-add a b f x = a f (b f x)
+toChurch : Nat -> Main.church 
+toChurch Z t f x = x
+toChurch (S n) t f x = f (toChurch n t f x)
 
 
-minusOne : ({A : Type} -> (A -> A) -> A -> A) -> ({B : Type} -> (B -> B) -> B -> B)
-minusOne a f x = fst $ (a (\(x, y) => (y, add y one f x)) (zero f x, zero f x))
+addOne : Main.church -> Main.church
+addOne a t f x = a t f (f x)
+
+add : Main.church -> Main.church -> Main.church
+add a b t f x = a t f (b t f x)
+
+addEx : Main.church -> Main.church -> Main.church
+addEx a b = (a (Main.church) addOne (b)) 
+
+ff : (a : Type) -> Int
+ff x = 1
+
+
+pc : Type
+pc = (Main.church, Main.church)
+
+fn : Main.pc -> Main.pc
+fn (a, b) = (b, addOne b)
+
+init : (Main.church, Main.church)
+init = (zero, zero)
+
+
+minusOne : Main.church -> Main.church 
+minusOne a = (fst $ (a (Main.church, Main.church) (\(x, y) => (y, addOne x)) (zero, zero)))
+
+
+minus : Main.church -> Main.church -> Main.church
+minus a b = b Main.church minusOne a
+
+
+mult : Main.church -> Main.church -> Main.church
+mult a b = a Main.church (add b) zero
+
+pow : Main.church -> Main.church -> Main.church
+pow a b = a Main.church (mult b) one
+
