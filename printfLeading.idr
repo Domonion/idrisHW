@@ -23,6 +23,7 @@ mutual
   formatHelper s ('d' :: l) orig with (parseNumWithoutSign (s) 0)
       | Just a = FLeadZero a (format l)
       | Nothing = FOther '%' (FOther '0' (format orig))
+  formatHelper [] ('d' :: l) orig = FInt (format l)
   formatHelper s (c :: l) orig with ('0' <= c && '9' >= c)
       | True = formatHelper (s ++ (unpack $ singleton c)) l orig
       | False = FOther '%' (FOther '0' (format orig))
