@@ -1,13 +1,26 @@
 
 %default total
 
-conj : ({A : Type} -> {B : Type} -> {C : Type} -> ((A -> B -> C)) -> (A) -> (B) -> C)
-conj f a b = f a b
+makePair : a -> b -> ( (t : Type) -> ( ( a -> b -> t ) -> t )  )
+makePair x y = \z => \f => f x y
 
+myTrue : a -> b -> a
+myTrue f g = f
 
-x : Int
-x = conj (\a => \b => a) 1 2
+myFalse : a -> b -> b
+myFalse f g = g
 
+getFirst : ( (a -> b -> a ) -> a ) -> a
+getFirst pair = pair myTrue
 
-disj : {A : Type} -> {B : Type} -> {C : Type} -> ((A -> C) -> (B -> C) -> C) -> (A -> C) -> (B -> C) -> C
-disj disp f g = disp f g
+getSecond : ( ( a -> b -> b ) -> b) -> b
+getSecond pair = pair myFalse
+
+inj1 : (b : Type) -> a -> ( (g : Type) -> ( (a -> g) -> (b -> g) -> g) )
+inj1 _ a = \t => \fa => \fb => fa a
+
+inj2 : (a : Type) -> b -> ( ( g : Type) -> ( ( a -> g) -> (b -> g) -> g) ) 
+inj2 _ b = \t => \fa => \fb => fb b
+
+myCase : ( ( a -> g ) -> ( b -> g) -> g) -> (a -> g) -> (b -> g) -> g
+myCase alg f g = alg f g
